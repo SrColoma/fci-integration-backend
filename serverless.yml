@@ -1,0 +1,86 @@
+service: fci-integration-backend
+frameworkVersion: '3'
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+provider:
+  environment:
+    USERS_TABLE: 'users-${self:provider.stage}'
+    IS_OFFLINE: 'false'
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-west-1
+  iam:
+    Role:
+      Statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - { "Fn::GetAtt": ['users-${self:provider.stage}', "Arn" ] }
+
+# custom:
+#   # USERS_TABLE: 'users-table-${self:provider.stage}'
+#   dynamodb:
+#     stages:
+#       - dev
+#     start:
+#       docker: true
+#       port: 8000
+#       inMemory: true
+#       migrate: true
+#       seed: true
+#       convertEmptyValues: true
+
+functions:
+  deleteTable:
+    handler: src/deleteTable.deleteTable
+    events:
+      - httpApi:
+          path: /deleteTable/{tableName}
+          method: get
+  hello:
+    handler: src/hello.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  addUser:
+    handler: src/addUser.addUser
+    events:
+      - httpApi:
+          path: /addUser
+          method: post
+  getUser:
+    handler: src/getUser.getUser
+    events:
+      - httpApi:
+          path: /getUser/{userId}
+          method: get
+  getUsers:
+    handler: src/getUsers.getUsers
+    events:
+      - httpApi:
+          path: /getUsers
+          method: get
+
+resources:
+  Resources:
+    table:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: 'users-${self:provider.stage}'
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
