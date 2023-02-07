@@ -26,18 +26,18 @@ provider:
           Resource:
             - { "Fn::GetAtt": ['users-${self:provider.stage}', "Arn" ] }
 
-# custom:
-#   # USERS_TABLE: 'users-table-${self:provider.stage}'
-#   dynamodb:
-#     stages:
-#       - dev
-#     start:
-#       docker: true
-#       port: 8000
-#       inMemory: true
-#       migrate: true
-#       seed: true
-#       convertEmptyValues: true
+custom:
+  # USERS_TABLE: 'users-table-${self:provider.stage}'
+  dynamodb:
+    stages:
+      - dev
+    start:
+      docker: true
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+      convertEmptyValues: true
 
 functions:
   deleteTable:
