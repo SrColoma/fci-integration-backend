@@ -1,44 +1,50 @@
 
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
-const { getDbClient } = require('./funciones');
+const { getDbClient } = require('../funciones');
 
-// recive los valores de los sensores
+// recive los valores de los sensores por post
 // los guarda en dynamoDB 
-// consulta la frecuencia de muestreo
-// retorna la frecuencia de muestreo
+// consulta la configuracion de la caja
+// la configuracion de la caja
 module.exports.addValores = async (request) => {
     const nuevosValores = JSON.parse(request.body);
     const dynamoDbClient = getDbClient();
     const valores = {
         id: uuidv4(),
-        fecha: new Date().toISOString(),
+        fecha: new Date().to,
         valores: nuevosValores,
-        // temperatura: nuevosValores.temperatura,
-        // humedad: nuevosValores.humedad,
-        // ph: nuevosValores.ph,
-        // oxigeno: nuevosValores.oxigeno,
-        // salinidad: nuevosValores.salinidad,
-        // turbiedad: nuevosValores.turbiedad,
-        // luz: nuevosValores.luz,
     }
 
-    //agregar await al principio para produccion
-    /*await*/ dynamoDbClient.put({
+    //guarda los valores en la base de datos
+    await dynamoDbClient.put({
         TableName: process.env.CAMARON_VALORES_TABLE,
         Item: valores,
-    }).promise()
-
-    // consulta la frecuencia de muestreo
-    const frecuencia = await dynamoDbClient.get({
-        TableName: process.env.CAMARON_FRECUENCIA_TABLE,
-        Key: {
-            id: "frecuencia",
+    }).promise().catch((err) => {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: err }),
         }
-    }).promise()
+    })
+    
 
+    // consulta la configuracion de la caja
+    const configuracion = await dynamoDbClient.get({
+        TableName: process.env.CAMARON_CONFIGURACION_TABLE,
+        Key: {
+            id: "configuracion",
+        }
+    }).promise().catch((err) => {
+        // envia el error err
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: err }),
+        }
+    })
+
+    // retorna la configuracion de la caja
     return {
         statusCode: 200,
-        body: JSON.stringify(frecuencia.Item.frecuencia),
+        body: JSON.stringify({"configuracion":configuracion.Item,"valores":valores}),
     }
 }
