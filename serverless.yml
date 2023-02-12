@@ -129,7 +129,7 @@ resources:
           - AttributeName: id
             AttributeType: S
           - AttributeName: fecha
-            AttributeType: N
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -141,9 +141,9 @@ resources:
         # GlobalSecondaryIndexes:
         #   - IndexName: 'fecha-hora-index'
         #     KeySchema:
-        #       - AttributeName: fecha
+        #       - AttributeName: id
         #         KeyType: HASH
-        #       - AttributeName: hora
+        #       - AttributeName: fecha
         #         KeyType: RANGE
         #     Projection:
         #       ProjectionType: ALL

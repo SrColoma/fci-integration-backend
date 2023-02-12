@@ -8,12 +8,16 @@ const { getDbClient } = require('../funciones');
 module.exports.getValores = async (request) => {
     const dynamoDbClient = getDbClient();
     const { fechaInicio, fechaFinal } = JSON.parse(request.body);
+    console.log(fechaInicio, fechaFinal);
 
     // consulta los valores de los sensores en el rango de fechas
     const valores = await dynamoDbClient.query({
         TableName: process.env.CAMARON_VALORES_TABLE,
         // IndexName: 'fecha-hora-index',
-        KeyConditionExpression: "fecha BETWEEN :fechaInicio AND :fechaFinal",
+        KeyConditionExpression: "#fecha BETWEEN :fechaInicio AND :fechaFinal",
+        ExpressionAttributeNames: {
+            "#fecha": "fecha",
+        },
         ExpressionAttributeValues: {
             ":fechaInicio": fechaInicio,
             ":fechaFinal": fechaFinal,
@@ -21,13 +25,14 @@ module.exports.getValores = async (request) => {
     }).promise().catch((err) => {
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: err }),
+            body: JSON.stringify(err),
         }
     })
 
     // retorna los valores de los sensores en el rango de fechas
     return {
         statusCode: 200,
-        body: JSON.stringify({res:valores}),
+        body: JSON.stringify(valores),
     }
+
 }

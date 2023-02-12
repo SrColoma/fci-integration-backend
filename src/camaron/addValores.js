@@ -12,7 +12,7 @@ module.exports.addValores = async (request) => {
     const dynamoDbClient = getDbClient();
     const valores = {
         id: uuidv4(),
-        fecha: new Date().to,
+        fecha: new Date().toISOString(),
         valores: nuevosValores,
     }
 
